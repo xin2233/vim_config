@@ -1,6 +1,4 @@
 """""""""""""""""" vim 通用配置 """""""""""""""""""""
-"""配色""""
-colorscheme desert
 
 """"vim ctags 自动更新"""""
 noremap <F6> <ESC>:!ctags -R *<CR>:set tags=./tags,./TAGS,tags,TAG<CR>
@@ -24,7 +22,8 @@ set wildmenu
 
 " 配色方案
 set background=dark
-colorscheme solarized
+"colorscheme desert
+colorscheme ron
 "colorscheme molokai
 "colorscheme phd
 
@@ -88,9 +87,6 @@ Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
 "  这个好像是个搜索插件，可以快速的找到文件
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
-" Unmanaged plugin (manually installed and updated)
-Plug '~/my-prototype-plugin'
-
 Plug 'majutsushi/tagbar'
 
 "Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
@@ -133,16 +129,21 @@ map <F3> :NERDTreeMirror<CR>
 map <F3> :NERDTreeToggle<CR>
 
 " 启动vim时自动打开NERDTree，并将光标放在Tree的Tag
-autocmd VimEnter * NERDTree
+"autocmd VimEnter * NERDTree
 
 " 启动vim时自动打开NERDTree，并将光标放在vim打开的文件
-autocmd VimEnter * NERDTree | wincmd p
+"autocmd VimEnter * NERDTree | wincmd p
 
 " 如果退出vim后只剩Tree的Tag的话，则自动退出Tree的Tag
-autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+"autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 
 " 当打开文件时，如果 NERDTree 是唯一的窗口，则关闭它
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+"autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+"当打开vim且没有文件时自动打开NERDTree
+autocmd vimenter * if !argc() | NERDTree | endif
+" 只剩 NERDTree时自动关闭
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 
 """""""""""""" NERDTreeToggle end """"""""""""""""""""
 
@@ -176,11 +177,7 @@ if has("cscope")
         cs add cscope.out
     " 添加环境变量中指定的数据库
     elseif $CSCOPE_DB != ""
-        cs add $CSCOPE_DB
-    endif
-    
-    set cscopequickfix=s-,g-,c-,f-,t-,d-,i-,e-,a-
-    
+        cs 
     " 快捷键映射
     " leader : default \
     nnoremap <leader>fs :cs find s <c-r>=expand("<cword>")<cr><cr>:copen<cr>  " 查找C语言符号，即查找函数名、宏、枚举值等出现的地方

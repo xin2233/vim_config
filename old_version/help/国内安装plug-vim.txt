@@ -1,0 +1,27 @@
+国内vim通过plug.vim安装插件
+
+1.将plug.vim克隆下载后复制到autoload目录下。
+
+1）plug.vim国内对应的镜像地址：https://gitcode.com/gh_mirrors/vi/vim-plug ( 链接 )
+
+2）克隆并复制：
+
+git clone https://gitcode.com/gh_mirrors/vi/vim-plug
+mkdir ~/.vim/autoload
+cp vim-plug/plug.vim ~/.vim/autoload/
+2.编辑.vimrc文件，在前面增加如下内容：
+
+call plug#begin('~/.vim/plugged')
+
+" 示例插件（按需添加，这里是neovim的插件安装示例）
+Plug 'https://gitcode.com/neoclide/ncoc.vim', {'branch': 'release'}  " 自动补全
+Plug 'https://gitcode.com/nvim-treesitter/nvim-treesitter'          " 语法高亮
+Plug 'https://gitcode.com/scrooloose/nerdtree'                      " 文件树
+
+call plug#end()
+要注意的是，要在插件名称前面添加：https://gitcode.com/。否则无法访问国外的网站导致无法安装。
+
+3.打开vim，执行PlugInstall命令安装插件
+
+:PlugInstall
+

@@ -1,0 +1,13 @@
+创建目录，将vim-plug 放进去
+mkdir ~/.vim/autoload -p
+cp vim-plug/plug.vim ~/.vim/autoload/
+
+修改vimrc
+mv vimrc.vim ~/.vimrc 
+
+打开vim，并安装相关的插件
+vim
+
+进入命令行，:PlugInstall 
+等待完成
+
