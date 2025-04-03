@@ -1,8 +1,5 @@
 """""""""""""""""" vim 通用配置 """""""""""""""""""""
 
-""""vim ctags 自动更新"""""
-noremap <F6> <ESC>:!ctags -R *<CR>:set tags=./tags,./TAGS,tags,TAG<CR>
-
 " 开启文件类型侦测
 filetype on
 " 根据侦测到的不同类型加载对应的插件
@@ -22,10 +19,8 @@ set wildmenu
 
 " 配色方案
 set background=dark
-"colorscheme desert
 colorscheme ron
-"colorscheme molokai
-"colorscheme phd
+"colorscheme molokai or  desert 
 
 " 禁止光标闪烁
 "set gcr=a:block-blinkon0
@@ -66,6 +61,15 @@ set shiftwidth=4
 " 让 vim 把连续数量的空格视为一个制表符
 set softtabstop=4
 
+" <<<< 函数标签跳转 >>>>
+" 正向遍历同名标签
+nmap <Leader>tn :tnext<CR>
+" 反向遍历同名标签
+nmap <Leader>tp :tprevious<CR>
+
+""""vim ctags 自动更新"""""
+noremap <F6> <ESC>:!ctags -R *<CR>:set tags=./tags,./TAGS,tags,TAG<CR>
+
 """""""""""""""""" vim 通用配置 end """""""""""""""""""""
 
 
@@ -93,6 +97,9 @@ Plug 'majutsushi/tagbar'
 
 "Plug 'valloric/youcompleteme'  -- failed  需要联网，在离线环境不好配置
 
+" 括号带颜色
+Plug 'luochen1990/rainbow-3.3.1'
+
 Plug 'vim-airline/vim-airline' "主题插件，可以使得状态栏的颜色更加丰富"
 Plug 'vim-airline/vim-airline-themes'
 
@@ -110,7 +117,13 @@ call plug#end()
 set laststatus=2  								" 永远显示状态栏
 let g:airline_powerline_fonts = 1  				" 支持 powerline 字体
 let g:airline#extensions#tabline#enabled = 1 	" 显示窗口tab和buffer
-let g:airline_theme='moloai'  					" murmur配色不错
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+let g:airline#extensions#whitespace#enabled = 0
+"let g:airline_theme='moloai'  					" murmur配色不错
+let g:airline_theme = 'dark'
+if &background == "light"
+    let g:airline_theme = 'light'
+endif
 
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
@@ -121,6 +134,26 @@ let g:airline_right_sep = '◀'
 let g:airline_right_alt_sep = '❮'
 let g:airline_symbols.linenr = '¶'
 let g:airline_symbols.branch = '⎇'
+
+" <<  <leader>+ number, buffet 跳转 >>
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+nmap <leader>1 <Plug>AirlineSelectTab1
+nmap <leader>2 <Plug>AirlineSelectTab2
+nmap <leader>3 <Plug>AirlineSelectTab3
+nmap <leader>4 <Plug>AirlineSelectTab4
+nmap <leader>5 <Plug>AirlineSelectTab5
+nmap <leader>6 <Plug>AirlineSelectTab6
+nmap <leader>7 <Plug>AirlineSelectTab7
+nmap <leader>8 <Plug>AirlineSelectTab8
+nmap <leader>9 <Plug>AirlineSelectTab9	
+
+
+" << Buffers 切换 tab  and  shift + tab >>
+nmap <S-Tab> :bprev<Return>
+nmap <Tab> :bnext<Return>
+
+""  << plug: rainbow >>
+let g:rainbow_active = 1
 
 
 """"""""""""" 文件树设置 NERDTreeToggle """"""""""""""""""""
@@ -135,15 +168,15 @@ map <F3> :NERDTreeToggle<CR>
 "autocmd VimEnter * NERDTree | wincmd p
 
 " 如果退出vim后只剩Tree的Tag的话，则自动退出Tree的Tag
-"autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 
 " 当打开文件时，如果 NERDTree 是唯一的窗口，则关闭它
-"autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 "当打开vim且没有文件时自动打开NERDTree
-autocmd vimenter * if !argc() | NERDTree | endif
+"autocmd vimenter * if !argc() | NERDTree | endif
 " 只剩 NERDTree时自动关闭
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+"autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 
 """""""""""""" NERDTreeToggle end """"""""""""""""""""
 
@@ -163,87 +196,14 @@ let Tlist_Auto_Open=1    "在启动VIM后，自动打开taglist窗口
 """""""""""""""""""end """""""""""""""""""""""""""
 
 """""""""""""" cscope 配置 """"""""""""""""""""""""""""
-" 指定了执行cscpoe的命令
-" csto 值决定了:cstag执行查找的顺序。为0则cscope数据将会被优先查找，然后才会查找tag文件。为1，则查找顺序相反。默认值是0
-" cscopequickfix指定了是否使用quickfix窗口来显示cscope的结果
+" todo
 
-if has("cscope")
-    set csprg=/usr/bin/cscope 
-    set csto=0  " cscope数据将会被优先查找
-    set nocsverb
-    
-    " 添加当前目录下的数据库
-    if filereadable("cscope.out")       
-        cs add cscope.out
-    " 添加环境变量中指定的数据库
-    elseif $CSCOPE_DB != ""
-        cs 
-    " 快捷键映射
-    " leader : default \
-    nnoremap <leader>fs :cs find s <c-r>=expand("<cword>")<cr><cr>:copen<cr>  " 查找C语言符号，即查找函数名、宏、枚举值等出现的地方
-    nnoremap <leader>fg :cs find g <c-r>=expand("<cword>")<cr><cr>:copen<cr>  " 查找函数、宏、枚举等定义的位置
-    nnoremap <leader>fd :cs find d <c-r>=expand("<cword>")<cr><cr>:copen<cr>  " 查找本函数调用的函数       
-    nnoremap <leader>fc :cs find c <c-r>=expand("<cword>")<cr><cr>:copen<cr>  " 查找调用本函数的函数
-    nnoremap <leader>ft :cs find t <c-r>=expand("<cword>")<cr><cr>:copen<cr>  " 查找指定的字符串
-    nnoremap <leader>fe :cs find e <c-r>=expand("<cword>")<cr><cr>:copen<cr>  " 查找egrep模式，相当于egrep功能，但查找速度快多了
-    nnoremap <leader>ff :cs find f <c-r>=expand("<cfile>")<cr><cr>:copen<cr>  " 查找并打开文件，类似vim的find功能
-    nnoremap <leader>fi :cs find i <c-r>=expand("<cfile>")<cr><cr>:copen<cr>  " 查找包含本文件的文件
-     
-    nnoremap <c-j> :cnext<cr>      " 切换至下一个cscopequickfix的搜索结果 映射为 ctrl+j            
-    nnoremap <c-k> :cprev<cr>      " 切换至上一个cscopequickfix的搜索结果 映射为 ctrl+k                                                                  
-                                                       
-    nnoremap <leader>t :copen<cr>  " 打开cscopequickfix窗口
-    autocmd FileType qf nnoremap <buffer> <CR> <CR>:cclose<CR>
-endif
-"""""""""""""" cscope 配置 end """"""""""""""""""""""""""""
-
-
-""""""""""""""""""""" tagbar 定制 """"""""""""""""""""""""
-" 设置 tagbar 子窗口的位置出现在主编辑区的左边 
-let tagbar_left=1 
-" 设置显示／隐藏标签列表子窗口的快捷键。速记：identifier list by tag
-nnoremap <Leader>ilt :TagbarToggle<CR> 
-" 设置标签子窗口的宽度 
-let tagbar_width=32 
-" tagbar 子窗口中不显示冗余帮助信息 
-let g:tagbar_compact=1
-" 设置 ctags 对哪些代码标识符生成标签
-let g:tagbar_type_cpp = {
-    \ 'kinds' : [
-         \ 'c:classes:0:1',
-         \ 'd:macros:0:1',
-         \ 'e:enumerators:0:0', 
-         \ 'f:functions:0:1',
-         \ 'g:enumeration:0:1',
-         \ 'l:local:0:1',
-         \ 'm:members:0:1',
-         \ 'n:namespaces:0:1',
-         \ 'p:functions_prototypes:0:1',
-         \ 's:structs:0:1',
-         \ 't:typedefs:0:1',
-         \ 'u:unions:0:1',
-         \ 'v:global:0:1',
-         \ 'x:external:0:1'
-     \ ],
-     \ 'sro'        : '::',
-     \ 'kind2scope' : {
-         \ 'g' : 'enum',
-         \ 'n' : 'namespace',
-         \ 'c' : 'class',
-         \ 's' : 'struct',
-         \ 'u' : 'union'
-     \ },
-     \ 'scope2kind' : {
-         \ 'enum'      : 'g',
-         \ 'namespace' : 'n',
-         \ 'class'     : 'c',
-         \ 'struct'    : 's',
-         \ 'union'     : 'u'
-     \ }
-\ }
-
-""""""""""""""""""""" tagbar 定制 end """"""""""""""""""""""""
+""""""""""""" fzf """""""""""""""""'''
+" <<< fzf 配置： 就可以使用 Ctrl + p 来快速打开文件了。 >>>
+nnoremap <C-p> :Files<CR>
+" <<< fzf 配置： 实现查找工程中特定字符的工具，这样ctrl + f 就可以进行全局的字符串搜索了
+" ubuntu 需要安装 : sudo apt-get install ripgrep
+nnoremap <C-f> :Rg<CR>  
 
 """""""""" 具体插件定制 end """"""""""""
-
 

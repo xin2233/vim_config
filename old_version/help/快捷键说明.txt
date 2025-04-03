@@ -14,3 +14,7 @@
  
 ctags 刷新
  | 刷新ctags | F5 | 定制 |
+
+ buffer 
+ | tab |
+ | \ + number |
